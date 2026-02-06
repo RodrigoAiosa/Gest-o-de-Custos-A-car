@@ -12,6 +12,11 @@ st.markdown("""
     <style>
     /* Fundo Bege */
     .stApp { background-color: #F5F5DC; }
+
+    /* TÍTULO PRINCIPAL */
+    h1 {
+    color: #000000 !important;
+    }
     
     /* Barra Lateral Escura */
     [data-testid="stSidebar"] { background-color: #1A1A1A; }
@@ -99,3 +104,4 @@ col3.metric("Economia", f"R$ {economia:,.2f}")
 
 if economia > 0:
     st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
+
