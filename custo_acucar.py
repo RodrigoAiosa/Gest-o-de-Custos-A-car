@@ -5,7 +5,7 @@ import pyodbc
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
-    page_title="Calculadora de Custo: Açúcar aiosa", 
+    page_title="Calculadora de Custo: Açúcar", 
     page_icon="☕", 
     layout="centered"
 )
@@ -14,26 +14,26 @@ st.set_page_config(
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-# 2. DESIGN MODERNO E MINIMALISTA (TUDO PRETO NO BEGE)
+# 2. DESIGN MODERNO E MINIMALISTA (FOCO NO BOTÃO COM TEXTO BRANCO)
 st.markdown("""
     <style>
     /* Fundo Geral */
     .stApp { background-color: #F5F5DC; }
     
-    /* Reset de cores para Títulos, Rótulos e Textos */
+    /* Títulos, Rótulos e Textos em Preto */
     h1, h2, h3, p, label, span, .stMarkdown {
         color: #000000 !important;
         font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Remove o fundo cinza/escuro do formulário para deixá-lo minimalista */
+    /* Formulário Minimalista (Removendo fundos escuros/cinzas) */
     [data-testid="stForm"] {
         border: none !important;
         padding: 0 !important;
         background-color: transparent !important;
     }
 
-    /* Estilização dos Campos de Entrada (Minimalista) */
+    /* Campos de Entrada Brancos com Borda Preta */
     input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
@@ -42,12 +42,11 @@ st.markdown("""
         -webkit-text-fill-color: #000000 !important;
     }
 
-    /* Cor do texto de exemplo (Placeholder) */
     input::placeholder {
         color: #888888 !important;
     }
 
-    /* Botão Moderno */
+    /* BOTÃO: FUNDO PRETO E TEXTO BRANCO */
     .stButton>button {
         background-color: #000000 !important;
         color: #FFFFFF !important;
@@ -58,8 +57,11 @@ st.markdown("""
         height: 3.5em;
         transition: 0.3s;
     }
+    
+    /* Hover do Botão: Mantém texto branco */
     .stButton>button:hover {
         background-color: #333333 !important;
+        color: #FFFFFF !important;
         transform: translateY(-2px);
     }
 
@@ -74,6 +76,8 @@ st.markdown("""
 def salvar_no_sql(nome, email, celular):
     """Insere dados na tabela Contatos preservando os existentes."""
     try:
+        # Nota: Trusted_Connection só funciona localmente. 
+        # No Cloud, use UID e PWD na string.
         conn_str = (
             "Driver={ODBC Driver 17 for SQL Server};"
             "Server=RODRIGOAIOSA\SQLEXPRESS;"
@@ -105,7 +109,7 @@ def validar_dados(nome, email, celular):
         return False
     return True
 
-# --- FLUXO ---
+# --- FLUXO DE TELAS ---
 
 if not st.session_state.autenticado:
     st.markdown("# 🎬 Cadastro de Acesso")
@@ -116,6 +120,7 @@ if not st.session_state.autenticado:
         email_input = st.text_input("E-mail")
         celular_input = st.text_input("Celular (apenas números)", max_chars=11, placeholder="11977019335")
         
+        # Botão agora com texto branco garantido pelo CSS
         if st.form_submit_button("Acessar Aplicativo"):
             if validar_dados(nome_input, email_input, celular_input):
                 if salvar_no_sql(nome_input, email_input, celular_input):
@@ -124,6 +129,7 @@ if not st.session_state.autenticado:
                     st.rerun()
 
 else:
+    # TELA PRINCIPAL
     st.title("☕ Gestão de Custos: Açúcar")
     st.markdown(f"### Bem-vindo, {st.session_state.dados_usuario['nome']}")
     
@@ -141,12 +147,13 @@ else:
     # Cálculos
     total_xicaras = funcionarios * xicaras_dia * dias_ano
     total_kg = (total_xicaras * peso_sache_g) / 1000
-    caixas = math.ceil(total_kg / ((sache_por_caixa * peso_sache_g) / 1000))
+    peso_caixa_kg = (sache_por_caixa * peso_sache_g) / 1000
+    caixas = math.ceil(total_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
     custo_granel = total_kg * preco_kg_granel
     custo_sache = caixas * preco_caixa
     economia = custo_sache - custo_granel
 
-    # Display
+    # Display de Resultados
     st.divider()
     c1, c2, c3 = st.columns(3)
     c1.metric("Consumo Anual", f"{total_kg:.1f} kg")
