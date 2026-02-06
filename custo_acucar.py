@@ -14,30 +14,42 @@ st.set_page_config(
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-# 2. ESTILIZAÇÃO CSS (FOCO TOTAL NA COR PRETA PARA TEXTOS)
+# 2. ESTILIZAÇÃO CSS (TEXTOS TOTAIS EM PRETO)
 st.markdown("""
     <style>
     /* Fundo da aplicação */
     .stApp { background-color: #F5F5DC; }
     
-    /* Forçar preto em absolutamente tudo na área principal */
-    .main h1, .main h2, .main h3, .main p, .main span, .main label, 
-    .main [data-testid="stMarkdownContainer"] p, 
-    .main [data-testid="stWidgetLabel"] p { 
-        color: #000000 !important; 
+    /* 1. TÍTULOS E TEXTOS GERAIS */
+    .main h1, .main h2, .main h3, .main p, .main span, .main label {
+        color: #000000 !important;
     }
-    
-    /* Garantir que o título "Cadastro de Acesso" e "Olá" fiquem pretos */
-    [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #000000 !important; }
 
-    /* Estilo da Barra Lateral (Mantida escura para contraste) */
+    /* 2. RÓTULOS (LABELS) DOS CAMPOS */
+    [data-testid="stWidgetLabel"] p {
+        color: #000000 !important;
+        font-weight: bold !important;
+    }
+
+    /* 3. TEXTO DIGITADO DENTRO DOS CAMPOS */
+    input {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
+
+    /* 4. TEXTO DE EXEMPLO (PLACEHOLDER) */
+    input::placeholder {
+        color: #666666 !important;
+        opacity: 1;
+    }
+
+    /* Estilo da Barra Lateral */
     [data-testid="stSidebar"] { background-color: #3E2723; }
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] label, [data-testid="stSidebar"] p { 
         color: #FFFFFF !important; 
     }
 
-    /* Estilo do Botão Roxo */
+    /* Botão Roxo */
     .stButton>button {
         background-color: #7D3CFF;
         color: white !important;
@@ -49,10 +61,9 @@ st.markdown("""
     }
     .stButton>button:hover { background-color: #5A27C6; color: white !important; }
     
-    /* Inputs: Borda roxa e texto interno preto */
+    /* Caixa de entrada branca com borda roxa */
     .stTextInput>div>div>input { 
         border: 1px solid #7D3CFF !important; 
-        color: #000000 !important;
         background-color: #FFFFFF !important;
     }
     </style>
@@ -103,7 +114,6 @@ def validar_dados(nome, email, celular):
 # --- FLUXO DE TELAS ---
 
 if not st.session_state.autenticado:
-    # Títulos agora forçados para preto via CSS
     st.markdown("# 🎬 Cadastro de Acesso")
     st.markdown("### Identifique-se para acessar a calculadora.")
     
