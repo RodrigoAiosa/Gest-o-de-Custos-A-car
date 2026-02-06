@@ -1,0 +1,13 @@
+[theme]
+primaryColor = "#6F4E37"
+backgroundColor = "#F5F5DC"
+secondaryBackgroundColor = "#3E2723"
+textColor = "#000000"
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+enableCORS = false
+[connections.gsheets]
+spreadsheet = "https://docs.google.com/spreadsheets/d/1mpuwsoM1hqAI-1JDT2iTYT0ga6vw5CjbPuQBh7GCK60/edit?gid=0#gid=0"

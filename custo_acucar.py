@@ -1,7 +1,8 @@
 import streamlit as st
+from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 import math
 import re
-import pyodbc
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
@@ -14,19 +15,19 @@ st.set_page_config(
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-# 2. DESIGN MODERNO E MINIMALISTA (FOCO NO BOTÃO COM TEXTO BRANCO)
+# 2. DESIGN MODERNO E MINIMALISTA (PRETO NO BEGE)
 st.markdown("""
     <style>
     /* Fundo Geral */
     .stApp { background-color: #F5F5DC; }
     
-    /* Títulos, Rótulos e Textos em Preto */
-    h1, h2, h3, p, label, span, .stMarkdown {
+    /* Todos os textos, títulos e rótulos em PRETO */
+    h1, h2, h3, p, label, span, .stMarkdown, [data-testid="stWidgetLabel"] p {
         color: #000000 !important;
         font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Formulário Minimalista (Removendo fundos escuros/cinzas) */
+    /* Remove o fundo e bordas do formulário (Design Clean) */
     [data-testid="stForm"] {
         border: none !important;
         padding: 0 !important;
@@ -42,10 +43,6 @@ st.markdown("""
         -webkit-text-fill-color: #000000 !important;
     }
 
-    input::placeholder {
-        color: #888888 !important;
-    }
-
     /* BOTÃO: FUNDO PRETO E TEXTO BRANCO */
     .stButton>button {
         background-color: #000000 !important;
@@ -58,54 +55,60 @@ st.markdown("""
         transition: 0.3s;
     }
     
-    /* Hover do Botão: Mantém texto branco */
     .stButton>button:hover {
         background-color: #333333 !important;
         color: #FFFFFF !important;
-        transform: translateY(-2px);
     }
 
     /* Barra Lateral */
     [data-testid="stSidebar"] { background-color: #1A1A1A; }
     [data-testid="stSidebar"] * { color: #FFFFFF !important; }
+    
+    /* Ajuste de métricas para ficarem pretas */
+    [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
+        color: #000000 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNÇÕES DE APOIO ---
+# 3. CONEXÃO COM GOOGLE SHEETS
+# Certifique-se de configurar o link da planilha nos Secrets do Streamlit
+conn = st.connection("gsheets", type=GSheetsConnection)
 
-def salvar_no_sql(nome, email, celular):
-    """Insere dados na tabela Contatos preservando os existentes."""
+def salvar_no_sheets(nome, email, celular):
+    """Salva dados na planilha preservando os existentes [cite: 2026-01-18]."""
     try:
-        # Nota: Trusted_Connection só funciona localmente. 
-        # No Cloud, use UID e PWD na string.
-        conn_str = (
-            "Driver={ODBC Driver 17 for SQL Server};"
-            "Server=RODRIGOAIOSA\SQLEXPRESS;"
-            "Database=BD_APP;"
-            "Trusted_Connection=yes;"
-        )
-        conn = pyodbc.connect(conn_str)
-        cursor = conn.cursor()
-        query = "INSERT INTO Contatos (aplicativo, nome_completo, email, celular) VALUES (?, ?, ?, ?)"
-        cursor.execute(query, ("Gestão de Custos: Açúcar", nome, email, celular))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        # Lê os dados atuais
+        df_atual = conn.read()
+        
+        # Cria a nova linha
+        novo_registro = pd.DataFrame([{
+            "aplicativo": "Gestão de Custos: Açúcar",
+            "nome_completo": nome,
+            "email": email,
+            "celular": celular
+        }])
+        
+        # Concatena preservando o histórico
+        df_final = pd.concat([df_atual, novo_registro], ignore_index=True)
+        
+        # Atualiza a planilha
+        conn.update(data=df_final)
         return True
     except Exception as e:
-        st.error(f"Erro no Banco de Dados: {e}")
+        st.error(f"Erro ao salvar na Planilha: {e}")
         return False
 
 def validar_dados(nome, email, celular):
     regex_email = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
     if len(nome) < 10:
-        st.error("Nome deve ter 10+ letras.")
+        st.error("O nome deve ter pelo menos 10 letras.")
         return False
     if not re.search(regex_email, email):
         st.error("E-mail inválido.")
         return False
     if not celular.isdigit() or len(celular) != 11:
-        st.error("Celular deve ter 11 dígitos.")
+        st.error("Celular deve ter 11 dígitos (apenas números).")
         return False
     return True
 
@@ -113,58 +116,62 @@ def validar_dados(nome, email, celular):
 
 if not st.session_state.autenticado:
     st.markdown("# 🎬 Cadastro de Acesso")
-    st.write("Preencha os dados para continuar.")
+    st.write("Identifique-se para acessar a calculadora.")
     
     with st.form("form_cadastro"):
         nome_input = st.text_input("Nome Completo")
         email_input = st.text_input("E-mail")
-        celular_input = st.text_input("Celular (apenas números)", max_chars=11, placeholder="11977019335")
+        celular_input = st.text_input("Celular", max_chars=11, placeholder="11977019335")
         
-        # Botão agora com texto branco garantido pelo CSS
         if st.form_submit_button("Acessar Aplicativo"):
             if validar_dados(nome_input, email_input, celular_input):
-                if salvar_no_sql(nome_input, email_input, celular_input):
+                if salvar_no_sheets(nome_input, email_input, celular_input):
                     st.session_state.dados_usuario = {"nome": nome_input}
                     st.session_state.autenticado = True
                     st.rerun()
 
 else:
-    # TELA PRINCIPAL
+    # TELA PRINCIPAL (CALCULADORA)
     st.title("☕ Gestão de Custos: Açúcar")
-    st.markdown(f"### Bem-vindo, {st.session_state.dados_usuario['nome']}")
+    st.markdown(f"### Bem-vindo, {st.session_state.dados_usuario['nome']}!")
     
     with st.sidebar:
         st.header("📋 Parâmetros")
-        funcionarios = st.number_input("Funcionários", min_value=1, value=50)
-        xicaras_dia = st.number_input("Xícaras/dia", min_value=1, value=2)
-        dias_ano = st.number_input("Dias úteis/ano", min_value=1, value=250)
+        func = st.number_input("Número de funcionários", min_value=1, value=50)
+        xic = st.number_input("Média de xícaras/dia", min_value=1, value=2)
+        dias = st.number_input("Dias úteis no ano", min_value=1, value=250)
         st.divider()
-        peso_sache_g = st.number_input("Peso sachê (g)", value=5.0)
-        preco_kg_granel = st.number_input("Preço kg (R$)", value=4.50)
-        preco_caixa = st.number_input("Preço caixa (R$)", value=35.00)
-        sache_por_caixa = st.number_input("Sachês/caixa", value=400)
+        st.header("💰 Custos e Pesos")
+        p_sache = st.number_input("Peso do sachê (g)", value=5.0)
+        p_granel = st.number_input("Preço kg a granel (R$)", value=4.50)
+        p_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
+        s_caixa = st.number_input("Sachês por caixa", value=400)
 
-    # Cálculos
-    total_xicaras = funcionarios * xicaras_dia * dias_ano
-    total_kg = (total_xicaras * peso_sache_g) / 1000
-    peso_caixa_kg = (sache_por_caixa * peso_sache_g) / 1000
+    # Lógica de Cálculo
+    total_xic = func * xic * dias
+    total_kg = (total_xic * p_sache) / 1000
+    peso_caixa_kg = (s_caixa * p_sache) / 1000
     caixas = math.ceil(total_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
-    custo_granel = total_kg * preco_kg_granel
-    custo_sache = caixas * preco_caixa
-    economia = custo_sache - custo_granel
+    c_granel = total_kg * p_granel
+    c_sache = caixas * p_caixa
+    economia = c_sache - c_granel
 
-    # Display de Resultados
+    # Resultados
     st.divider()
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Consumo Anual", f"{total_kg:.1f} kg")
-    c2.metric("Xícaras", f"{total_xicaras:,.0f}")
-    c3.metric("Caixas", int(caixas))
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Consumo Anual", f"{total_kg:.1f} kg")
+    col2.metric("Total Xícaras", f"{total_xic:,}".replace(",", "."))
+    col3.metric("Caixas (Sachê)", int(caixas))
 
-    st.info(f"Custo Granel: R$ {custo_granel:,.2f}")
-    st.warning(f"Custo Sachê: R$ {custo_sache:,.2f}")
-    
+    st.markdown("---")
+    st.subheader("📊 Comparativo Financeiro")
+    st.info(f"**Custo A Granel:** R$ {c_granel:,.2f}")
+    st.warning(f"**Custo Em Sachês:** R$ {c_sache:,.2f}")
+
     if economia > 0:
-        st.success(f"Economia Anual: R$ {economia:,.2f}")
+        st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
+    else:
+        st.error("### O sachê é mais vantajoso!")
 
     if st.button("Sair"):
         st.session_state.autenticado = False
