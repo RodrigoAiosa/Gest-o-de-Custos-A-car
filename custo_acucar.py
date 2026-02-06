@@ -8,28 +8,44 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. DESIGN MODERNO E MINIMALISTA (PRETO NO BEGE)
+# 2. DESIGN MODERNO E MINIMALISTA (PRETO NO BEGE + BARRA LATERAL BRANCA)
 st.markdown("""
     <style>
     /* Fundo Geral */
     .stApp { background-color: #F5F5DC; }
     
-    /* Todos os textos, títulos e rótulos em PRETO */
-    h1, h2, h3, p, label, span, .stMarkdown, [data-testid="stWidgetLabel"] p {
+    /* Área Principal: Textos, títulos e rótulos em PRETO */
+    .main h1, .main h2, .main h3, .main p, .main label, .main span, 
+    .main [data-testid="stWidgetLabel"] p {
         color: #000000 !important;
         font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Campos de Entrada Brancos com Borda Preta */
-    input {
+    /* BARRA LATERAL: TEXTOS E RÓTULOS EM BRANCO */
+    [data-testid="stSidebar"] {
+        background-color: #1A1A1A;
+    }
+    
+    /* Seleciona especificamente os textos e labels dentro da barra lateral */
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3, 
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] label, 
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+        color: #FFFFFF !important;
+    }
+
+    /* Campos de Entrada Brancos com Borda Preta na área principal */
+    .main input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
         border: 1.5px solid #000000 !important;
         border-radius: 5px !important;
-        -webkit-text-fill-color: #000000 !important;
     }
 
-    /* BOTÃO: FUNDO PRETO E TEXTO BRANCO */
+    /* BOTÃO PRINCIPAL: FUNDO PRETO E TEXTO BRANCO */
     .stButton>button {
         background-color: #000000 !important;
         color: #FFFFFF !important;
@@ -46,12 +62,8 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Barra Lateral */
-    [data-testid="stSidebar"] { background-color: #1A1A1A; }
-    [data-testid="stSidebar"] * { color: #FFFFFF !important; }
-    
-    /* Ajuste de métricas para ficarem pretas */
-    [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
+    /* Ajuste de métricas na área principal para preto */
+    .main [data-testid="stMetricValue"], .main [data-testid="stMetricLabel"] {
         color: #000000 !important;
     }
     </style>
@@ -83,7 +95,7 @@ c_granel = total_kg * p_granel
 c_sache = caixas * p_caixa
 economia = c_sache - c_granel
 
-# Resultados
+# Resultados na área principal
 st.divider()
 col1, col2, col3 = st.columns(3)
 col1.metric("Consumo Anual", f"{total_kg:.1f} kg")
