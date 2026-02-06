@@ -5,74 +5,74 @@ import pyodbc
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
-    page_title="Calculadora de Custo: Açúcar", 
+    page_title="Calculadora de Custo: Açúcar aiosa", 
     page_icon="☕", 
     layout="centered"
 )
 
-# --- INICIALIZAÇÃO DO ESTADO DE ACESSO ---
+# --- INICIALIZAÇÃO DO ESTADO ---
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-# 2. ESTILIZAÇÃO CSS (TEXTOS TOTAIS EM PRETO)
+# 2. DESIGN MODERNO E MINIMALISTA (TUDO PRETO NO BEGE)
 st.markdown("""
     <style>
-    /* Fundo da aplicação */
+    /* Fundo Geral */
     .stApp { background-color: #F5F5DC; }
     
-    /* 1. TÍTULOS E TEXTOS GERAIS */
-    .main h1, .main h2, .main h3, .main p, .main span, .main label {
+    /* Reset de cores para Títulos, Rótulos e Textos */
+    h1, h2, h3, p, label, span, .stMarkdown {
         color: #000000 !important;
+        font-family: 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* 2. RÓTULOS (LABELS) DOS CAMPOS */
-    [data-testid="stWidgetLabel"] p {
-        color: #000000 !important;
-        font-weight: bold !important;
+    /* Remove o fundo cinza/escuro do formulário para deixá-lo minimalista */
+    [data-testid="stForm"] {
+        border: none !important;
+        padding: 0 !important;
+        background-color: transparent !important;
     }
 
-    /* 3. TEXTO DIGITADO DENTRO DOS CAMPOS */
+    /* Estilização dos Campos de Entrada (Minimalista) */
     input {
         color: #000000 !important;
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #000000 !important;
+        border-radius: 5px !important;
         -webkit-text-fill-color: #000000 !important;
     }
 
-    /* 4. TEXTO DE EXEMPLO (PLACEHOLDER) */
+    /* Cor do texto de exemplo (Placeholder) */
     input::placeholder {
-        color: #666666 !important;
-        opacity: 1;
+        color: #888888 !important;
     }
 
-    /* Estilo da Barra Lateral */
-    [data-testid="stSidebar"] { background-color: #3E2723; }
-    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] label, [data-testid="stSidebar"] p { 
-        color: #FFFFFF !important; 
-    }
-
-    /* Botão Roxo */
+    /* Botão Moderno */
     .stButton>button {
-        background-color: #7D3CFF;
-        color: white !important;
-        border-radius: 8px;
+        background-color: #000000 !important;
+        color: #FFFFFF !important;
+        border-radius: 5px;
         border: none;
         width: 100%;
         font-weight: bold;
-        height: 3em;
+        height: 3.5em;
+        transition: 0.3s;
     }
-    .stButton>button:hover { background-color: #5A27C6; color: white !important; }
-    
-    /* Caixa de entrada branca com borda roxa */
-    .stTextInput>div>div>input { 
-        border: 1px solid #7D3CFF !important; 
-        background-color: #FFFFFF !important;
+    .stButton>button:hover {
+        background-color: #333333 !important;
+        transform: translateY(-2px);
     }
+
+    /* Barra Lateral */
+    [data-testid="stSidebar"] { background-color: #1A1A1A; }
+    [data-testid="stSidebar"] * { color: #FFFFFF !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- FUNÇÕES DE APOIO ---
 
 def salvar_no_sql(nome, email, celular):
-    """Insere dados na tabela Contatos preservando os existentes [cite: 2026-01-18]."""
+    """Insere dados na tabela Contatos preservando os existentes."""
     try:
         conn_str = (
             "Driver={ODBC Driver 17 for SQL Server};"
@@ -82,49 +82,41 @@ def salvar_no_sql(nome, email, celular):
         )
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
-        
-        query = """
-            INSERT INTO Contatos (aplicativo, nome_completo, email, celular) 
-            VALUES (?, ?, ?, ?)
-        """
+        query = "INSERT INTO Contatos (aplicativo, nome_completo, email, celular) VALUES (?, ?, ?, ?)"
         cursor.execute(query, ("Gestão de Custos: Açúcar", nome, email, celular))
-        
         conn.commit()
         cursor.close()
         conn.close()
         return True
     except Exception as e:
-        st.error(f"Erro ao salvar no Banco de Dados: {e}")
+        st.error(f"Erro no Banco de Dados: {e}")
         return False
 
 def validar_dados(nome, email, celular):
-    """Validações estritas."""
     regex_email = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
     if len(nome) < 10:
-        st.error("O nome deve conter pelo menos 10 letras.")
+        st.error("Nome deve ter 10+ letras.")
         return False
     if not re.search(regex_email, email):
         st.error("E-mail inválido.")
         return False
     if not celular.isdigit() or len(celular) != 11:
-        st.error("O celular deve ter exatamente 11 dígitos numéricos.")
+        st.error("Celular deve ter 11 dígitos.")
         return False
     return True
 
-# --- FLUXO DE TELAS ---
+# --- FLUXO ---
 
 if not st.session_state.autenticado:
     st.markdown("# 🎬 Cadastro de Acesso")
-    st.markdown("### Identifique-se para acessar a calculadora.")
+    st.write("Preencha os dados para continuar.")
     
     with st.form("form_cadastro"):
         nome_input = st.text_input("Nome Completo")
         email_input = st.text_input("E-mail")
         celular_input = st.text_input("Celular (apenas números)", max_chars=11, placeholder="11977019335")
         
-        btn_acessar = st.form_submit_button("Acessar Aplicativo")
-        
-        if btn_acessar:
+        if st.form_submit_button("Acessar Aplicativo"):
             if validar_dados(nome_input, email_input, celular_input):
                 if salvar_no_sql(nome_input, email_input, celular_input):
                     st.session_state.dados_usuario = {"nome": nome_input}
@@ -132,50 +124,41 @@ if not st.session_state.autenticado:
                     st.rerun()
 
 else:
-    # TELA PRINCIPAL (CALCULADORA)
     st.title("☕ Gestão de Custos: Açúcar")
-    st.markdown(f"## Olá, {st.session_state.dados_usuario['nome']}!")
+    st.markdown(f"### Bem-vindo, {st.session_state.dados_usuario['nome']}")
     
-    st.sidebar.header("📋 Parâmetros")
     with st.sidebar:
-        funcionarios = st.number_input("Número de funcionários", min_value=1, value=50)
-        xicaras_dia = st.number_input("Média de xícaras/dia", min_value=1, value=2)
-        dias_ano = st.number_input("Dias úteis no ano", min_value=1, value=250)
-        
+        st.header("📋 Parâmetros")
+        funcionarios = st.number_input("Funcionários", min_value=1, value=50)
+        xicaras_dia = st.number_input("Xícaras/dia", min_value=1, value=2)
+        dias_ano = st.number_input("Dias úteis/ano", min_value=1, value=250)
         st.divider()
-        st.header("💰 Custos")
-        peso_sache_g = st.number_input("Peso do sachê (g)", value=5.0)
-        preco_kg_granel = st.number_input("Preço kg a granel (R$)", value=4.50)
-        preco_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
-        sache_por_caixa = st.number_input("Sachês por caixa", value=400)
+        peso_sache_g = st.number_input("Peso sachê (g)", value=5.0)
+        preco_kg_granel = st.number_input("Preço kg (R$)", value=4.50)
+        preco_caixa = st.number_input("Preço caixa (R$)", value=35.00)
+        sache_por_caixa = st.number_input("Sachês/caixa", value=400)
 
-    # Lógica de Cálculo
+    # Cálculos
     total_xicaras = funcionarios * xicaras_dia * dias_ano
-    total_acucar_kg = (total_xicaras * peso_sache_g) / 1000
-    peso_caixa_kg = (sache_por_caixa * peso_sache_g) / 1000
-    caixas_necessarias = math.ceil(total_acucar_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
-    custo_granel = total_acucar_kg * preco_kg_granel
-    custo_sache = caixas_necessarias * preco_caixa
+    total_kg = (total_xicaras * peso_sache_g) / 1000
+    caixas = math.ceil(total_kg / ((sache_por_caixa * peso_sache_g) / 1000))
+    custo_granel = total_kg * preco_kg_granel
+    custo_sache = caixas * preco_caixa
     economia = custo_sache - custo_granel
 
-    # Resultados
+    # Display
     st.divider()
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Consumo Anual", f"{total_acucar_kg:.1f} kg")
-    col2.metric("Total de Xícaras", f"{total_xicaras:,.0f}".replace(",", "."))
-    col3.metric("Caixas (Sachê)", f"{int(caixas_necessarias)}")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Consumo Anual", f"{total_kg:.1f} kg")
+    c2.metric("Xícaras", f"{total_xicaras:,.0f}")
+    c3.metric("Caixas", int(caixas))
 
-    st.markdown("---")
-    st.subheader("📊 Comparativo Financeiro")
-    c1, c2 = st.columns(2)
-    with c1: st.info(f"**Custo A Granel:**\nR$ {custo_granel:,.2f}")
-    with c2: st.warning(f"**Custo Em Sachês:**\nR$ {custo_sache:,.2f}")
-
+    st.info(f"Custo Granel: R$ {custo_granel:,.2f}")
+    st.warning(f"Custo Sachê: R$ {custo_sache:,.2f}")
+    
     if economia > 0:
-        st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
-    else:
-        st.error(f"### O sachê é mais vantajoso!")
+        st.success(f"Economia Anual: R$ {economia:,.2f}")
 
-    if st.button("Sair / Novo Cadastro"):
+    if st.button("Sair"):
         st.session_state.autenticado = False
         st.rerun()
