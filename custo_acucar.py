@@ -3,11 +3,11 @@ import math
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
-    page_title="Calculadora de Custo: Açúcar", 
+    page_title="Calculadora de Custo: Açúcar",
     layout="centered"
 )
 
-# 2. CSS PARA RÓTULOS PRETOS E FUNDO BEGE
+# 2. CSS
 st.markdown("""
     <style>
     /* Fundo Bege */
@@ -16,29 +16,51 @@ st.markdown("""
     /* Barra Lateral Escura */
     [data-testid="stSidebar"] { background-color: #1A1A1A; }
 
-    /* RÓTULOS (LABELS): FONTE PRETA EM TODO O APP */
-    /* Garante a leitura dos nomes dos campos na barra lateral e área principal */
+    /* Labels padrão */
     label [data-testid="stWidgetLabel"] p {
         color: #000000 !important;
         font-weight: bold !important;
     }
 
-    /* Títulos da Sidebar em Branco para Contraste */
-    [data-testid="stSidebar"] h2 { color: #FFFFFF !important; }
+    /* Títulos da Sidebar */
+    [data-testid="stSidebar"] h2 {
+        color: #FFFFFF !important;
+    }
 
-    /* Campos de Entrada: Brancos com texto preto */
+    /* Inputs */
     input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
         -webkit-text-fill-color: #000000 !important;
     }
 
-    /* Botão Principal: Preto com texto branco */
+    /* Botão */
     .stButton>button {
         background-color: #000000 !important;
         color: #FFFFFF !important;
         border: none;
     }
+
+    /* ===== DESTAQUES (VALORES PRINCIPAIS) ===== */
+
+    /* Valores das métricas */
+    [data-testid="stMetricValue"] {
+        color: #000000 !important;
+        font-weight: bold;
+    }
+
+    /* Labels das métricas */
+    [data-testid="stMetricLabel"] {
+        color: #000000 !important;
+        font-weight: bold;
+    }
+
+    /* Caixa de economia */
+    [data-testid="stAlert"] {
+        color: #000000 !important;
+        font-weight: bold;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -50,14 +72,16 @@ with st.sidebar:
     func = st.number_input("Número de funcionários", min_value=1, value=50)
     xic = st.number_input("Média de xícaras/dia", min_value=1, value=2)
     dias = st.number_input("Dias úteis no ano", min_value=1, value=250)
+
     st.divider()
+
     st.header("💰 Custos e Pesos")
     p_sache = st.number_input("Peso do sachê (g)", value=5.0)
     p_granel = st.number_input("Preço kg a granel (R$)", value=4.50)
     p_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
     s_caixa = st.number_input("Sachês por caixa", value=400)
 
-# Cálculos
+# 4. CÁLCULOS
 total_kg = (func * xic * dias * p_sache) / 1000
 peso_caixa_kg = (s_caixa * p_sache) / 1000
 caixas = math.ceil(total_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
@@ -65,8 +89,9 @@ c_granel = total_kg * p_granel
 c_sache = caixas * p_caixa
 economia = c_sache - c_granel
 
-# Resultados
+# 5. RESULTADOS
 st.divider()
+
 col1, col2, col3 = st.columns(3)
 col1.metric("Consumo Anual", f"{total_kg:.1f} kg")
 col2.metric("Caixas (Sachê)", int(caixas))
