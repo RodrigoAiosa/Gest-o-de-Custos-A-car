@@ -8,7 +8,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. DESIGN CORRIGIDO: RÓTULOS DA SIDEBAR EM BRANCO, RESTO LEGÍVEL
+# 2. DESIGN: FOCO TOTAL NA LEGIBILIDADE DOS RÓTULOS (FONTE PRETA)
 st.markdown("""
     <style>
     /* FUNDO GERAL BEGE */
@@ -24,49 +24,40 @@ st.markdown("""
         background-color: #1A1A1A;
     }
 
-    /* AQUI ESTÁ O QUE VOCÊ QUER: SOMENTE OS RÓTULOS DOS PARÂMETROS EM BRANCO */
-    /* Mirando especificamente no parágrafo do label dentro da sidebar */
-    [data-testid="stSidebar"] label [data-testid="stWidgetLabel"] p {
-        color: #FFFFFF !important;
-        font-size: 1rem !important;
+    /* RÓTULOS EM PRETO (CONFORME SOLICITADO) */
+    /* Garante que o texto acima dos campos de entrada seja PRETO */
+    [data-testid="stWidgetLabel"] p {
+        color: #000000 !important;
+        font-weight: bold !important;
     }
 
-    /* TÍTULOS DA SIDEBAR EM BRANCO */
+    /* TÍTULOS DA SIDEBAR (PARÂMETROS / CUSTOS E PESOS) EM BRANCO PARA CONTRASTE */
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
         color: #FFFFFF !important;
     }
 
-    /* INPUTS: FUNDO BRANCO E TEXTO PRETO (PARA NÃO LER COM O CU) */
-    [data-testid="stSidebar"] input {
+    /* CAMPOS DE ENTRADA: BRANCO COM TEXTO PRETO */
+    input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
         -webkit-text-fill-color: #000000 !important;
     }
 
-    /* BOTÕES DE MAIS E MENOS DO INPUT EM BRANCO PARA ENXERGAR NO FUNDO ESCURO */
-    [data-testid="stSidebar"] button[data-testid="stNumberInputStepUp"], 
-    [data-testid="stSidebar"] button[data-testid="stNumberInputStepDown"] {
-        background-color: #333333 !important;
-        color: #FFFFFF !important;
-    }
-
-    /* BOTÃO PRINCIPAL PRETO COM TEXTO BRANCO */
-    .stButton>button {
-        background-color: #000000 !important;
-        color: #FFFFFF !important;
-        border-radius: 5px;
-        font-weight: bold;
+    /* AJUSTE DOS BOTÕES DE INCREMENTO (+/-) */
+    button[data-testid="stNumberInputStepUp"], 
+    button[data-testid="stNumberInputStepDown"] {
+        background-color: #EEEEEE !important;
+        color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- TELA DA CALCULADORA ---
+# --- CALCULADORA ---
 
 st.title("☕ Gestão de Custos: Açúcar")
 
 with st.sidebar:
     st.header("📋 Parâmetros")
-    # Estes rótulos agora aparecem em BRANCO
     func = st.number_input("Número de funcionários", min_value=1, value=50)
     xic = st.number_input("Média de xícaras/dia", min_value=1, value=2)
     dias = st.number_input("Dias úteis no ano", min_value=1, value=250)
@@ -77,7 +68,7 @@ with st.sidebar:
     p_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
     s_caixa = st.number_input("Sachês por caixa", value=400)
 
-# Lógica de Cálculo
+# Lógica
 total_xic = func * xic * dias
 total_kg = (total_xic * p_sache) / 1000
 peso_caixa_kg = (s_caixa * p_sache) / 1000
@@ -86,7 +77,7 @@ c_granel = total_kg * p_granel
 c_sache = caixas * p_caixa
 economia = c_sache - c_granel
 
-# Resultados na Área Principal
+# Resultados
 st.divider()
 col1, col2, col3 = st.columns(3)
 col1.metric("Consumo Anual", f"{total_kg:.1f} kg")
@@ -100,3 +91,5 @@ st.warning(f"**Custo Em Sachês:** R$ {c_sache:,.2f}")
 
 if economia > 0:
     st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
+else:
+    st.error("### O sachê é mais vantajoso!")
