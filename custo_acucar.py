@@ -5,8 +5,8 @@ import pyodbc
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
-    page_title="Calculadora de Custo: Açúcar",
-    page_icon="☕",
+    page_title="Calculadora de Custo: Açúcar", 
+    page_icon="☕", 
     layout="centered"
 )
 
@@ -60,7 +60,6 @@ st.markdown("""
 
 # --- FUNÇÕES DE APOIO ---
 
-
 def salvar_no_sql(nome, email, celular):
     """Insere dados na tabela Contatos preservando os existentes [cite: 2026-01-18]."""
     try:
@@ -73,14 +72,13 @@ def salvar_no_sql(nome, email, celular):
         )
         conn = pyodbc.connect(conn_str)
         cursor = conn.cursor()
-
+        
         query = """
             INSERT INTO Contatos (aplicativo, nome_completo, email, celular) 
             VALUES (?, ?, ?, ?)
         """
-        cursor.execute(
-            query, ("Gestão de Custos: Açúcar", nome, email, celular))
-
+        cursor.execute(query, ("Gestão de Custos: Açúcar", nome, email, celular))
+        
         conn.commit()
         cursor.close()
         conn.close()
@@ -89,42 +87,39 @@ def salvar_no_sql(nome, email, celular):
         st.error(f"Erro ao salvar no Banco de Dados: {e}")
         return False
 
-
 def validar_dados(nome, email, celular):
     """Validações estritas para Nome e Celular (apenas 11 números)."""
     regex_email = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-
+    
     if len(nome) < 10:
         st.error("O nome deve conter pelo menos 10 letras.")
         return False
     if not re.search(regex_email, email):
         st.error("E-mail inválido.")
         return False
-
+    
     if not celular.isdigit():
         st.error("O celular deve conter apenas números.")
         return False
     if len(celular) != 11:
         st.error("O celular deve ter exatamente 11 dígitos (DDD + Número).")
         return False
-
+        
     return True
 
 # --- FLUXO DE TELAS ---
 
-
 if not st.session_state.autenticado:
     st.markdown("### 🎬 Cadastro de Acesso")
     st.write("Identifique-se para acessar a calculadora.")
-
+    
     with st.form("form_cadastro"):
         nome_input = st.text_input("Nome Completo")
         email_input = st.text_input("E-mail")
-        celular_input = st.text_input(
-            "Celular (apenas números)", max_chars=11, placeholder="11977019335")
-
+        celular_input = st.text_input("Celular (apenas números)", max_chars=11, placeholder="11977019335")
+        
         btn_acessar = st.form_submit_button("Acessar Aplicativo")
-
+        
         if btn_acessar:
             if validar_dados(nome_input, email_input, celular_input):
                 if salvar_no_sql(nome_input, email_input, celular_input):
@@ -136,15 +131,13 @@ else:
     # TELA PRINCIPAL (CALCULADORA)
     st.title("☕ Gestão de Custos: Açúcar")
     st.markdown(f"Olá, **{st.session_state.dados_usuario['nome']}**!")
-
+    
     st.sidebar.header("📋 Parâmetros")
     with st.sidebar:
-        funcionarios = st.number_input(
-            "Número de funcionários", min_value=1, value=50)
-        xicaras_dia = st.number_input(
-            "Média de xícaras/dia", min_value=1, value=2)
+        funcionarios = st.number_input("Número de funcionários", min_value=1, value=50)
+        xicaras_dia = st.number_input("Média de xícaras/dia", min_value=1, value=2)
         dias_ano = st.number_input("Dias úteis no ano", min_value=1, value=250)
-
+        
         st.divider()
         st.header("💰 Custos e Pesos")
         peso_sache_g = st.number_input("Peso do sachê (g)", value=5.0)
@@ -156,8 +149,7 @@ else:
     total_xicaras = funcionarios * xicaras_dia * dias_ano
     total_acucar_kg = (total_xicaras * peso_sache_g) / 1000
     peso_caixa_kg = (sache_por_caixa * peso_sache_g) / 1000
-    caixas_necessarias = math.ceil(
-        total_acucar_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
+    caixas_necessarias = math.ceil(total_acucar_kg / peso_caixa_kg) if peso_caixa_kg > 0 else 0
     custo_granel = total_acucar_kg * preco_kg_granel
     custo_sache = caixas_necessarias * preco_caixa
     economia = custo_sache - custo_granel
@@ -172,10 +164,8 @@ else:
     st.markdown("---")
     st.subheader("📊 Comparativo Financeiro")
     c1, c2 = st.columns(2)
-    with c1:
-        st.info(f"**Custo A Granel:**\nR$ {custo_granel:,.2f}")
-    with c2:
-        st.warning(f"**Custo Em Sachês:**\nR$ {custo_sache:,.2f}")
+    with c1: st.info(f"**Custo A Granel:**\nR$ {custo_granel:,.2f}")
+    with c2: st.warning(f"**Custo Em Sachês:**\nR$ {custo_sache:,.2f}")
 
     if economia > 0:
         st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
