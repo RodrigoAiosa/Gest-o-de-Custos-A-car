@@ -8,71 +8,64 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. DESIGN MODERNO E MINIMALISTA (PRETO NO BEGE + BARRA LATERAL BRANCA)
+# 2. DESIGN CORRIGIDO (RÓTULOS PRETOS, FUNDO ESCURO APENAS NO CONTEXTO)
 st.markdown("""
     <style>
     /* Fundo Geral */
     .stApp { background-color: #F5F5DC; }
     
-    /* Área Principal: Textos, títulos e rótulos em PRETO */
-    .main h1, .main h2, .main h3, .main p, .main label, .main span, 
-    .main [data-testid="stWidgetLabel"] p {
+    /* TEXTOS GERAIS EM PRETO (Área principal e Rótulos) */
+    h1, h2, h3, p, label, span, [data-testid="stWidgetLabel"] p {
         color: #000000 !important;
-        font-family: 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Segoe UI', sans-serif;
     }
 
-    /* BARRA LATERAL: TEXTOS E RÓTULOS EM BRANCO */
+    /* BARRA LATERAL: FUNDO ESCURO */
     [data-testid="stSidebar"] {
         background-color: #1A1A1A;
     }
-    
-    /* Seleciona especificamente os textos e labels dentro da barra lateral */
+
+    /* TEXTOS ESPECÍFICOS DA BARRA LATERAL EM BRANCO (Títulos apenas) */
     [data-testid="stSidebar"] h1, 
     [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3, 
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] label, 
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+    [data-testid="stSidebar"] h3 {
         color: #FFFFFF !important;
     }
 
-    /* Campos de Entrada Brancos com Borda Preta na área principal */
-    .main input {
+    /* RÓTULOS DOS CAMPOS (Garantindo que fiquem pretos para leitura no bege/branco) */
+    .stNumberInput label p, .stTextInput label p {
+        color: #000000 !important;
+        font-weight: bold !important;
+    }
+
+    /* CAMPOS DE ENTRADA */
+    input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
         border: 1.5px solid #000000 !important;
-        border-radius: 5px !important;
     }
 
-    /* BOTÃO PRINCIPAL: FUNDO PRETO E TEXTO BRANCO */
+    /* BOTÃO PRETO COM TEXTO BRANCO */
     .stButton>button {
         background-color: #000000 !important;
         color: #FFFFFF !important;
         border-radius: 5px;
-        border: none;
+        height: 3.5em;
         width: 100%;
         font-weight: bold;
-        height: 3.5em;
-        transition: 0.3s;
     }
     
-    .stButton>button:hover {
-        background-color: #333333 !important;
-        color: #FFFFFF !important;
-    }
-
-    /* Ajuste de métricas na área principal para preto */
-    .main [data-testid="stMetricValue"], .main [data-testid="stMetricLabel"] {
+    /* MÉTRICAS EM PRETO */
+    [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
         color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- TELA ÚNICA (CALCULADORA DIRETA) ---
+# --- TELA DA CALCULADORA ---
 
 st.title("☕ Gestão de Custos: Açúcar")
-st.write("Ajuste os parâmetros na barra lateral para calcular a economia.")
+st.write("Ajuste os parâmetros na barra lateral para calcular.")
 
 with st.sidebar:
     st.header("📋 Parâmetros")
@@ -86,7 +79,7 @@ with st.sidebar:
     p_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
     s_caixa = st.number_input("Sachês por caixa", value=400)
 
-# Lógica de Cálculo
+# Cálculos
 total_xic = func * xic * dias
 total_kg = (total_xic * p_sache) / 1000
 peso_caixa_kg = (s_caixa * p_sache) / 1000
@@ -95,7 +88,7 @@ c_granel = total_kg * p_granel
 c_sache = caixas * p_caixa
 economia = c_sache - c_granel
 
-# Resultados na área principal
+# Resultados
 st.divider()
 col1, col2, col3 = st.columns(3)
 col1.metric("Consumo Anual", f"{total_kg:.1f} kg")
