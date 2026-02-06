@@ -8,14 +8,14 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. DESIGN MODERNO: RÓTULOS DA SIDEBAR EM BRANCO
+# 2. DESIGN CORRIGIDO: RÓTULOS DA SIDEBAR EM BRANCO, RESTO LEGÍVEL
 st.markdown("""
     <style>
     /* FUNDO GERAL BEGE */
     .stApp { background-color: #F5F5DC; }
     
-    /* ÁREA PRINCIPAL: TEXTOS EM PRETO */
-    .main h1, .main h2, .main h3, .main p, .main label, .main span {
+    /* ÁREA PRINCIPAL: TUDO EM PRETO */
+    .main h1, .main h2, .main h3, .main p, .main span, .main label {
         color: #000000 !important;
     }
 
@@ -24,33 +24,33 @@ st.markdown("""
         background-color: #1A1A1A;
     }
 
-    /* MUDANÇA SOLICITADA: RÓTULOS DOS PARÂMETROS NA SIDEBAR EM BRANCO */
-    /* Este seletor garante que apenas os rótulos dentro da sidebar fiquem brancos */
-    [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+    /* AQUI ESTÁ O QUE VOCÊ QUER: SOMENTE OS RÓTULOS DOS PARÂMETROS EM BRANCO */
+    /* Mirando especificamente no parágrafo do label dentro da sidebar */
+    [data-testid="stSidebar"] label [data-testid="stWidgetLabel"] p {
         color: #FFFFFF !important;
-        font-weight: bold !important;
+        font-size: 1rem !important;
     }
 
-    /* TÍTULOS DA SIDEBAR (PARÂMETROS / CUSTOS E PESOS) EM BRANCO */
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3 {
+    /* TÍTULOS DA SIDEBAR EM BRANCO */
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
         color: #FFFFFF !important;
     }
 
-    /* CAMPOS DE ENTRADA (MANTIDOS BRANCOS COM TEXTO PRETO PARA LEITURA) */
-    input {
+    /* INPUTS: FUNDO BRANCO E TEXTO PRETO (PARA NÃO LER COM O CU) */
+    [data-testid="stSidebar"] input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
-        border: 1.5px solid #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
-    /* MÉTRICAS E RESULTADOS NA ÁREA PRINCIPAL EM PRETO */
-    [data-testid="stMetricValue"], [data-testid="stMetricLabel"], .main h3 {
-        color: #000000 !important;
+    /* BOTÕES DE MAIS E MENOS DO INPUT EM BRANCO PARA ENXERGAR NO FUNDO ESCURO */
+    [data-testid="stSidebar"] button[data-testid="stNumberInputStepUp"], 
+    [data-testid="stSidebar"] button[data-testid="stNumberInputStepDown"] {
+        background-color: #333333 !important;
+        color: #FFFFFF !important;
     }
 
-    /* BOTÃO PRETO COM TEXTO BRANCO */
+    /* BOTÃO PRINCIPAL PRETO COM TEXTO BRANCO */
     .stButton>button {
         background-color: #000000 !important;
         color: #FFFFFF !important;
@@ -66,7 +66,7 @@ st.title("☕ Gestão de Custos: Açúcar")
 
 with st.sidebar:
     st.header("📋 Parâmetros")
-    # Os rótulos abaixo ficarão brancos conforme o CSS acima
+    # Estes rótulos agora aparecem em BRANCO
     func = st.number_input("Número de funcionários", min_value=1, value=50)
     xic = st.number_input("Média de xícaras/dia", min_value=1, value=2)
     dias = st.number_input("Dias úteis no ano", min_value=1, value=250)
