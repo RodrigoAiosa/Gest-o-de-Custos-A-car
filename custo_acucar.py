@@ -14,25 +14,24 @@ st.set_page_config(
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-# 2. ESTILIZAÇÃO CSS (CORREÇÃO DE CORES E LABELS)
+# 2. ESTILIZAÇÃO CSS (FOCO TOTAL NA COR PRETA PARA TEXTOS)
 st.markdown("""
     <style>
     /* Fundo da aplicação */
     .stApp { background-color: #F5F5DC; }
     
-    /* Forçar preto em textos, labels, widgets e parágrafos da área principal */
-    .main .stMarkdown p, .main h1, .main h2, .main h3, .main span, 
-    .main label, .main p, [data-testid="stWidgetLabel"] p { 
+    /* Forçar preto em absolutamente tudo na área principal */
+    .main h1, .main h2, .main h3, .main p, .main span, .main label, 
+    .main [data-testid="stMarkdownContainer"] p, 
+    .main [data-testid="stWidgetLabel"] p { 
         color: #000000 !important; 
     }
     
-    /* Reforço específico para labels de formulário */
-    div[data-testid="stForm"] label p {
-        color: #000000 !important;
-        font-weight: bold;
-    }
+    /* Garantir que o título "Cadastro de Acesso" e "Olá" fiquem pretos */
+    [data-testid="stHeader"] { background-color: rgba(0,0,0,0); }
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { color: #000000 !important; }
 
-    /* Estilo da Barra Lateral */
+    /* Estilo da Barra Lateral (Mantida escura para contraste) */
     [data-testid="stSidebar"] { background-color: #3E2723; }
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] label, [data-testid="stSidebar"] p { 
         color: #FFFFFF !important; 
@@ -50,10 +49,11 @@ st.markdown("""
     }
     .stButton>button:hover { background-color: #5A27C6; color: white !important; }
     
-    /* Borda nos inputs e cor do texto digitado */
+    /* Inputs: Borda roxa e texto interno preto */
     .stTextInput>div>div>input { 
         border: 1px solid #7D3CFF !important; 
         color: #000000 !important;
+        background-color: #FFFFFF !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -63,7 +63,6 @@ st.markdown("""
 def salvar_no_sql(nome, email, celular):
     """Insere dados na tabela Contatos preservando os existentes [cite: 2026-01-18]."""
     try:
-        # Nota: Se estiver no Streamlit Cloud, lembre-se de configurar o Driver no packages.txt
         conn_str = (
             "Driver={ODBC Driver 17 for SQL Server};"
             "Server=RODRIGOAIOSA\SQLEXPRESS;"
@@ -88,30 +87,25 @@ def salvar_no_sql(nome, email, celular):
         return False
 
 def validar_dados(nome, email, celular):
-    """Validações estritas para Nome e Celular (apenas 11 números)."""
+    """Validações estritas."""
     regex_email = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
-    
     if len(nome) < 10:
         st.error("O nome deve conter pelo menos 10 letras.")
         return False
     if not re.search(regex_email, email):
         st.error("E-mail inválido.")
         return False
-    
-    if not celular.isdigit():
-        st.error("O celular deve conter apenas números.")
+    if not celular.isdigit() or len(celular) != 11:
+        st.error("O celular deve ter exatamente 11 dígitos numéricos.")
         return False
-    if len(celular) != 11:
-        st.error("O celular deve ter exatamente 11 dígitos (DDD + Número).")
-        return False
-        
     return True
 
 # --- FLUXO DE TELAS ---
 
 if not st.session_state.autenticado:
-    st.markdown("### 🎬 Cadastro de Acesso")
-    st.write("Identifique-se para acessar a calculadora.")
+    # Títulos agora forçados para preto via CSS
+    st.markdown("# 🎬 Cadastro de Acesso")
+    st.markdown("### Identifique-se para acessar a calculadora.")
     
     with st.form("form_cadastro"):
         nome_input = st.text_input("Nome Completo")
@@ -130,7 +124,7 @@ if not st.session_state.autenticado:
 else:
     # TELA PRINCIPAL (CALCULADORA)
     st.title("☕ Gestão de Custos: Açúcar")
-    st.markdown(f"Olá, **{st.session_state.dados_usuario['nome']}**!")
+    st.markdown(f"## Olá, {st.session_state.dados_usuario['nome']}!")
     
     st.sidebar.header("📋 Parâmetros")
     with st.sidebar:
@@ -139,7 +133,7 @@ else:
         dias_ano = st.number_input("Dias úteis no ano", min_value=1, value=250)
         
         st.divider()
-        st.header("💰 Custos e Pesos")
+        st.header("💰 Custos")
         peso_sache_g = st.number_input("Peso do sachê (g)", value=5.0)
         preco_kg_granel = st.number_input("Preço kg a granel (R$)", value=4.50)
         preco_caixa = st.number_input("Preço da caixa (R$)", value=35.00)
