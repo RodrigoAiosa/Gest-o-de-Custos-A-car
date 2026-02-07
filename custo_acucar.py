@@ -104,3 +104,21 @@ col3.metric("Economia", f"R$ {economia:,.2f}")
 
 if economia > 0:
     st.success(f"### 🚀 Economia Anual: R$ {economia:,.2f}")
+
+# --- RODAPÉ (FOOTER) ---
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("---")
+footer_html = """
+<div style='text-align: center; color: gray;'>
+    <p style='margin-bottom: 5px;'>Desenvolvido por <b>Rodrigo AIOSA</b></p>
+    <div style='display: flex; justify-content: center; gap: 20px; font-size: 24px;'>
+        <a href='https://wa.me/5511977019335' target='_blank' style='text-decoration: none;'>
+            <img src='https://cdn-icons-png.flaticon.com/512/733/733585.png' width='25' height='25' title='WhatsApp'>
+        </a>
+        <a href='https://www.linkedin.com/in/rodrigoaiosa/' target='_blank' style='text-decoration: none;'>
+            <img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='25' height='25' title='LinkedIn'>
+        </a>
+    </div>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
